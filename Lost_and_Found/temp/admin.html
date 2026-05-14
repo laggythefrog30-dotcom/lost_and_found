@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_head %}
+<style>
+  .topbar { background: #003b28; }
+  .tab-btn.active { background: #003b28; border-color: #030e1f; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="section-title" style="color: rgb(111, 22, 7);">
+  Wenford Gwapo 😎
+</div>
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-value" style="color:#C62828;">{{ stats.lost }}</div>
+    <div class="stat-label">Lost Reports</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" style="color:#38a13e;">{{ stats.found }}</div>
+    <div class="stat-label">Found Reports</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" style="color:#F57F17;">{{ stats.pending }}</div>
+    <div class="stat-label">Pending</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" style="color:#003b28;">{{ stats.unclaimed }}</div>
+    <div class="stat-label">Unclaimed</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" style="color:#003b28;">{{ stats.users }}</div>
+    <div class="stat-label">Total Users</div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tab-group">
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tab-lost">Lost Items</button>
+    <button class="tab-btn"        data-tab="tab-found">Found Items</button>
+    <button class="tab-btn"        data-tab="tab-users">Users</button>
+  </div>
+
+  <div class="tab-content">
+
+    <!-- LOST ITEMS -->
+    <div class="tab-pane active" id="tab-lost">
+      <div class="tab-inner-bar">
+        <input type="text" placeholder="Search lost items…" data-search="#tbl-lost"
+               style="max-width:260px;padding:7px 12px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;outline:none;">
+        <span style="font-size:13px;color:var(--muted);">{{ lost_items|length }} record(s)</span>
+      </div>
+      <div class="table-wrap">
+        <table id="tbl-lost">
+          <thead>
+            <tr>
+              <th>#</th><th>Item Name</th><th>Description</th>
+              <th>Date Lost</th><th>Location</th><th>Status</th>
+              <th>Reporter</th><th>Reported At</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in lost_items %}
+            <tr>
+              <td>{{ item.id }}</td>
+              <td><strong>{{ item.item_name }}</strong></td>
+              <td style="color:var(--muted);max-width:160px;">{{ item.description or '—' }}</td>
+              <td>{{ item.date_lost }}</td>
+              <td>{{ item.location }}</td>
+              <td><span class="badge badge-{{ item.status }}">{{ item.status }}</span></td>
+              <td>{{ item.reporter }}</td>
+              <td style="color:var(--muted);font-size:12px;">{{ item.created_at }}</td>
+              <td>
+                <div class="table-actions">
+                  {% if item.status != 'claimed' %}
+                  <form method="POST" action="{{ url_for('update_lost', item_id=item.id) }}" style="display:inline;">
+                    <input type="hidden" name="status" value="claimed"/>
+                    <button type="submit" class="btn btn-success btn-sm" title="Mark as Claimed">✔ Claimed</button>
+                  </form>
+                  {% endif %}
+                  <form method="POST" action="{{ url_for('delete_lost', item_id=item.id) }}" style="display:inline;"
+                        onsubmit="return confirm('Delete this record?')">
+                    <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Delete">🗑</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr class="empty-row"><td colspan="9">No lost items recorded yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FOUND ITEMS -->
+    <div class="tab-pane" id="tab-found">
+      <div class="tab-inner-bar">
+        <input type="text" placeholder="Search found items…" data-search="#tbl-found"
+               style="max-width:260px;padding:7px 12px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;outline:none;">
+        <span style="font-size:13px;color:var(--muted);">{{ found_items|length }} record(s)</span>
+      </div>
+      <div class="table-wrap">
+        <table id="tbl-found">
+          <thead>
+            <tr>
+              <th>#</th><th>Item Name</th><th>Description</th>
+              <th>Date Found</th><th>Location</th><th>Status</th>
+              <th>Reporter</th><th>Reported At</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in found_items %}
+            <tr>
+              <td>{{ item.id }}</td>
+              <td><strong>{{ item.item_name }}</strong></td>
+              <td style="color:var(--muted);max-width:160px;">{{ item.description or '—' }}</td>
+              <td>{{ item.date_found }}</td>
+              <td>{{ item.location }}</td>
+              <td><span class="badge badge-{{ item.status }}">{{ item.status }}</span></td>
+              <td>{{ item.reporter }}</td>
+              <td style="color:var(--muted);font-size:12px;">{{ item.created_at }}</td>
+              <td>
+                <div class="table-actions">
+                  {% if item.status != 'returned' %}
+                  <form method="POST" action="{{ url_for('update_found', item_id=item.id) }}" style="display:inline;">
+                    <input type="hidden" name="status" value="returned"/>
+                    <button type="submit" class="btn btn-success btn-sm" title="Mark as Returned">✔ Returned</button>
+                  </form>
+                  {% endif %}
+                  <form method="POST" action="{{ url_for('delete_found', item_id=item.id) }}" style="display:inline;"
+                        onsubmit="return confirm('Delete this record?')">
+                    <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Delete">🗑</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr class="empty-row"><td colspan="9">No found items recorded yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="tab-pane" id="tab-users">
+      <div class="tab-inner-bar">
+        <input type="text" placeholder="Search users…" data-search="#tbl-users"
+               style="max-width:260px;padding:7px 12px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;outline:none;">
+        <span style="font-size:13px;color:var(--muted);">{{ users|length }} user(s)</span>
+      </div>
+      <div class="table-wrap">
+        <table id="tbl-users">
+          <thead>
+            <tr>
+              <th>#</th><th>Username</th><th>Full Name</th><th>Role</th><th>Registered At</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td>{{ user.id }}</td>
+              <td><code style="background:#f5f5fa;padding:2px 6px;border-radius:4px;font-size:12px;">{{ user.username }}</code></td>
+              <td>{{ user.full_name }}</td>
+              <td>
+                <span class="badge {% if user.role=='admin' %}badge-matched{% elif user.role=='staff' %}badge-pending{% else %}badge-unclaimed{% endif %}">
+                  {{ user.role }}
+                </span>
+              </td>
+              <td style="color:var(--muted);font-size:12px;">{{ user.created_at }}</td>
+              <td>
+                {% if user.id != session.user_id %}
+                <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" style="display:inline;"
+                      onsubmit="return confirm('Delete user {{ user.username }}?')">
+                  <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Delete User">🗑</button>
+                </form>
+                {% else %}
+                <span style="color:var(--muted);font-size:12px;">You</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %}
+            <tr class="empty-row"><td colspan="6">No users found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

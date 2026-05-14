@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Report Lost Item{% endblock %}
+
+{% block content %}
+<div style="max-width:580px;margin:0 auto;">
+  <div class="section-title">Report a Lost Item</div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Lost Item Details</span>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-sm">← Back</a>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('report_lost') }}">
+
+        <div class="form-group">
+          <label>Item Name <span style="color:var(--danger);">*</span></label>
+          <input type="text" name="item_name" required/>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea name="description" ></textarea>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="form-group">
+            <label>Date Lost <span style="color:var(--danger);">*</span></label>
+            <input type="date" name="date_lost" value="{{ today }}" required/>
+          </div>
+          <div class="form-group">
+            <label>Location <span style="color:var(--danger);">*</span></label>
+            <input type="text" name="location" required/>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+          <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary">Submit Lost Report</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelector('input[name=date_lost]').value = today;
+  });
+</script>
+{% endblock %}
